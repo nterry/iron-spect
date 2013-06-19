@@ -10,7 +10,7 @@ Gem::Specification.new do |gem|
   gem.email         = %w(Nicholas Terry)
   gem.description   = %q{C# project file parser and inspector}
   gem.summary       = %q{C# project file parser and inspector}
-  gem.homepage      = ''
+  gem.homepage      = 'https://github.com/nterry/iron-spect'
   gem.license       = 'Apache2'
 
   gem.files         = `git ls-files`.split($/)
@@ -22,4 +22,7 @@ Gem::Specification.new do |gem|
 
   gem.add_development_dependency 'bundler', '~> 1.3'
   gem.add_development_dependency 'rake'
+  gem.add_development_dependency 'rspec'
+  gem.add_development_dependency 'ruby-debug19'
+  gem.add_development_dependency 'rspec-mocks'
 end
