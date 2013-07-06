@@ -44,8 +44,8 @@ module IronSpect
         first_split = project.split('=').each { |x| x.strip }
         guid = first_split[0].scan(/.*(\"\{.*\}\").*/)[0][0]
         pre_value = first_split[1].split(',').each { |x| x.strip }
-        value = {:name => pre_value[0].strip, :path => pre_value[1].strip, :guid => pre_value[2].strip }
-        { :guid => guid.strip,  :assembly_info => value }
+        value = {:name => pre_value[0].strip.gsub("\"", ''), :path => pre_value[1].strip.gsub("\\", '/').gsub("\"", ''), :guid => pre_value[2].strip.gsub("\"", '') }
+        { :guid => guid.strip.gsub("\"", ''),  :assembly_info => value }
       end
 
       def parse_global_section(global_section)
