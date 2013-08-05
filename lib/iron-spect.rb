@@ -9,7 +9,12 @@ module IronSpect
       @sln_file_manager = Parsers::SolutionFileParser.new(repo_dir)
       @sln_file = @sln_file_manager.parse
       @repo_dir = repo_dir
-      @startup_csproj_file = get_global_property('MonoDevelopProperties', 'StartupItem')
+      #TODO: This is not correct, I need to either set the @startup_csproj_file variable to be a project object, or find a way to get the path (i.e. as a string) from the else block
+      @startup_csproj_file = if (get_global_property('MonoDevelopProperties', 'StartupItem')) then
+                               get_global_property('MonoDevelopProperties', 'StartupItem')
+                             else
+                               (find_first_exe_project) ? find_first_exe_project : @sln_file[:projects].first
+                             end
     end
 
     def get_executable_path(type)
@@ -36,7 +41,7 @@ module IronSpect
 
         next
       end
-      raise "Didn't find any Release executable paths" if (@out_path.nil? || @assembly_name.nil? || @out_type.nil?)
+      nil if (@out_path.nil? || @assembly_name.nil? || @out_type.nil?)
       "#{@repo_dir}/#{strip_csproj}/#{@out_path}#{@assembly_name}.#{@out_type}"
     end
 
@@ -47,7 +52,7 @@ module IronSpect
         prop_set.each do |p|
           return p[:value].gsub(/\\/, '/') if p[:key] === property
         end
-        raise "Property '#{property}' not found for property tag '#{property_tag}'"
+        nil
       end
     end
 
@@ -58,11 +63,24 @@ module IronSpect
           return project[:guid].gsub(/\\/, '/') if property === 'guid'
         end
       end
-      raise "Property '#{property}' not found for project '#{project_name}'"
+      nil
     end
 
     def strip_csproj
       @startup_csproj_file.match(/(^.*)\/.*\.csproj$/).captures[0].strip
+    end
+
+    private
+
+    def find_first_exe_project
+      @sln_file[:projects].each do |project|
+        project['PropertyGroup'].each do |property_group|
+          if property_group.include?('OutputType')
+            project if property_group['OutputType'] === 'Exe'
+          end
+        end
+      end
+      nil
     end
   end
 end
