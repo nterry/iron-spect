@@ -9,24 +9,32 @@ module IronSpect
       @sln_file_manager = Parsers::SolutionFileParser.new(repo_dir)
       @sln_file = @sln_file_manager.parse
       @repo_dir = repo_dir
-      #TODO: This is not correct, I need to either set the @startup_csproj_file variable to be a project object, or find a way to get the path (i.e. as a string) from the else block
       @startup_csproj_file = if (get_global_property('MonoDevelopProperties', 'StartupItem')) then
-                               get_global_property('MonoDevelopProperties', 'StartupItem')
+                               load_project get_global_property('MonoDevelopProperties', 'StartupItem')
                              else
-                               (find_first_exe_project) ? find_first_exe_project : @sln_file[:projects].first
+                               (first_exe_project) ? first_exe_project : @sln_file[:projects].first
                              end
+
     end
 
-    def get_executable_path(type)
-      raise "You must provide either 'Release' or 'Debug'" if not(type =~ /^(Debug|Release)$/)
+
+    def startup_project
+      @startup_csproj_file
+    end
 
 
-      @csproj_file_manager = Parsers::ProjectFileParser.new("#{@repo_dir}/#{@startup_csproj_file}")
+    def startup_executable_path(configuration, platform='AnyCPU')
+
+      #break out early if the configuration or type provided is invalid
+      nil if not(configuration =~ /^(Debug|Release)$/)
+      nil if not(platform =~ /^(AnyCPU|x86|x64|Itanium)$/)
+
+      @csproj_file_manager = Parsers::ProjectFileParser.new(startup_local_path)
       startup_csproj = @csproj_file_manager.parse
 
       startup_csproj['PropertyGroup'].each do |property|
         if property.include?('Condition')
-          if property['Condition'] === "'$(Configuration)|$(Platform)' == '#{type}|AnyCPU'"
+          if property['Condition'] === "'$(Configuration)|$(Platform)' == '#{configuration}|#{platform}'"
             @out_path = property['OutputPath'][0].gsub(/\\/, '/').strip
           end
         end
@@ -45,16 +53,19 @@ module IronSpect
       "#{@repo_dir}/#{strip_csproj}/#{@out_path}#{@assembly_name}.#{@out_type}"
     end
 
+
     def get_global_property(property_tag, property)
       @sln_file[:global].each do |prop|
+        #puts prop[:properties] if (prop[:property_tag] === property_tag)
         prop_set = prop[:properties] if (prop[:property_tag] === property_tag)
         next if prop_set.nil?
         prop_set.each do |p|
           return p[:value].gsub(/\\/, '/') if p[:key] === property
         end
-        nil
       end
+      nil
     end
+
 
     def get_project_property(project_name, property)
       @sln_file[:projects].each do |project|
@@ -66,21 +77,42 @@ module IronSpect
       nil
     end
 
-    def strip_csproj
-      @startup_csproj_file.match(/(^.*)\/.*\.csproj$/).captures[0].strip
-    end
 
     private
 
-    def find_first_exe_project
+    def first_exe_project
       @sln_file[:projects].each do |project|
-        project['PropertyGroup'].each do |property_group|
+        parsed = Parsers::ProjectFileParser.new(project[:assembly_info][:path]).parse
+        parsed['PropertyGroup'].each do |property_group|
           if property_group.include?('OutputType')
-            project if property_group['OutputType'] === 'Exe'
+            if property_group['OutputType'].first === 'Exe'
+              return project
+            end
           end
         end
       end
       nil
     end
+
+
+    def load_project(path)
+      @sln_file[:projects].each do |project|
+        if (project[:assembly_info][:path] === path)
+          return project
+        end
+        next
+      end
+      nil
+    end
+
+
+    def strip_csproj
+      startup_local_path.match(/(^.*)\/.*\.csproj$/).captures[0].strip
+    end
+
+    def startup_local_path
+      @startup_csproj_file[:assembly_info][:path]
+    end
+
   end
 end
