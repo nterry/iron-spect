@@ -7,7 +7,7 @@ module IronSpect
         @solution = {}
         if File.directory?(solution_file_path)
           sln_file = Dir["#{solution_file_path}/*.sln"]
-          raise "Solution file not present in directory #{solution_file_path}"  if sln_file.nil?
+          raise "Solution file not present in directory #{solution_file_path}"  if sln_file.empty?
           puts "Multiple solution files found in directory #{solution_file_path}. Accepting the first." if sln_file.count > 1
           @solution_file = File.open(sln_file[0], 'r+')
         elsif File.file?(solution_file_path)
