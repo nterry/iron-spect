@@ -1,5 +1,9 @@
 # IronSpect
 
+[![Build Status](https://travis-ci.org/nterry/iron-spect.png?branch=master)](https://travis-ci.org/nterry/iron-spect)&nbsp;&nbsp;&nbsp;&nbsp;[![Gem Version](https://badge.fury.io/rb/iron-spect.png)](http://badge.fury.io/rb/iron-spect)
+
+## Description
+
 IronSpect is a parser, serializer, and deserializer for Visual Studio 2010, 2012, and 2013 projects. It handles both .sln files and .csproj files.
 
 ## Installation
