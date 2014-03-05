@@ -1,0 +1,10 @@
+language: ruby
+rvm:
+- 1.9.2
+- 1.9.3
+- 2.0.0
+- 2.1.0
+deploy:
+  provider: rubygems
+  api_key:
+    secure: x2FeZ73jqBAcGDMP6ErW0dSAjfQgqA5wgz2AJ2cwAQr5SnuAfaGlXUw2okBKds2mTDiTSYyHm+2gf54KTcss3E7lWrMZBe685nNmqRV5OFyHA8sEEJN76lr/AJSvML8CLwiw9IWax1y68nYOzc/9PwVwZDczV1H1YuXxpv8haEk=

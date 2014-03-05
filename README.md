@@ -1,6 +1,6 @@
-# Iron::Spect
+# IronSpect
 
-TODO: Write a gem description
+IronSpect is a parser, serializer, and deserializer for Visual Studio 2010, 2012, and 2013 projects. It handles both .sln files and .csproj files.
 
 ## Installation
 
@@ -18,7 +18,21 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+First, initialize a new Inspecter object
+
+	inspecter = IronSpect::Inspecter.new(repo_directory)	#repo_directory defaults to dir.getwd
+
+Then, simply call one of the methods in the Inspecter class on the object. Here are a few examples:
+
+	startup_project = inspecter.startup_project
+	startup_exe_path = inspecter.startup_executable_path
+	
+	some_global_property = inspecter.get_global_property("property_tag", "property_name")
+	some_project_property = inspecter.get_project_property("project_name", "property_name")
+
+And thats it! It is, quite literally, that simple to use. 
+
+Happy coding!!
 
 ## Contributing
 
